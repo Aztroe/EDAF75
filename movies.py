@@ -22,24 +22,38 @@ def get_movies():
     return {"data": found}
 
 @movies_endpoint.post('/')
-def create_movie(): # TODO
+def create_movie():
     data = request.json()
     imdb_key = data.get('imdbKey')
     title = data.get('title')
     year = data.get('year')
 
     c = db.cursor()
-    c.execute(
-        """
-        SELECT lägg till ....
-        """
-    )
-
-
-#så att värdena returneras rätt och 
-# If the IMDB key is already in our database,
-# we'll not add anything to the database, 
-# return an empty string and the status code 400,
-# otherwise we add the movie to our database, return 
-# the string /movies/<imdbKey> (i.e., /movies/tt4975722
-# for "Moonlight"), and the status code 201.
+    try:
+        c.execute(
+            """
+            SELECT * FROM movies
+            WHERE imdb_key = ?
+            """,
+            [imdb_key]
+        )
+        found = c.fetchone()
+        if found:
+            response.status = 400
+            return ""
+        else:
+            c.execute(
+                """
+                INSERT
+                INTO movies (imdb_key, title, year)
+                VALUES (?, ?, ?)
+                """,
+                [imdb_key, title, year]
+            )
+            db.commit()
+            response.status = 201
+        return f"/movies/{imdb_key}"
+        
+    except sqlite3.IntegrityError:
+        response.sattus = 409
+        return ""

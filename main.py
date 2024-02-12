@@ -6,10 +6,12 @@ db = sqlite3.connect('movies.sqlite')
 
 from movies import movies_endpoint
 # from users import users_endpoint
+from performances import performances_endpoint
 
 main = Bottle()
 main.mount('/movies', movies_endpoint)
 # main.mount('/users', users_endpoint)
+main.mount('/performances', performances_endpoint)
 
 @main.get('/ping')
 def ping():
@@ -54,7 +56,7 @@ def reset():
                ('Skandia',     100);
         """
     )
-    #TODO db.commit() -> sqlite3.OperationalError: disk I/O error 
+    db.commit() #-> sqlite3.OperationalError: disk I/O error 
     # ksk att main.py inte får modifiera movies.sqlite filen
     response.status = 200
 
