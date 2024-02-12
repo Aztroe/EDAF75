@@ -15,21 +15,24 @@ CREATE TABLE theater (
 );
 
 CREATE TABLE screening (
-    start_date   DATE,
-    start_time   TIME,
-    theater_name TEXT,
-    movie_title  TEXT,
-    movie_year   INTEGER,
+    screening_id    TEXT,
+    start_date      DATE,
+    start_time      TIME,
+    theater_name    TEXT,
+    movie_title     TEXT,
+    movie_year      INTEGER,
+    remaining_seats INTEGER,
     FOREIGN KEY  (theater_name) REFERENCES theater(theater_name),
-    FOREIGN KEY  (movie_title, movie_year)  REFERENCES movie(movie_title, movie_year)
-    PRIMARY KEY  (theater_name, movie_title, movie_year, start_date, start_time)
+    FOREIGN KEY  (movie_title, movie_year)  REFERENCES movie(movie_title, movie_year),
+    PRIMARY KEY  (screening_id)
+    -- PRIMARY KEY  (theater_name, movie_title, movie_year, start_date, start_time)
 );
 
 CREATE TABLE movie (
     movie_title     TEXT,
     movie_year      INTEGER,
     imdb_key        TEXT,
-    run_time        TIME,
+    -- run_time        TIME,
     PRIMARY KEY  (movie_title, movie_year)
 );
 
