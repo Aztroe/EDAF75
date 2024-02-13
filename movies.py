@@ -33,7 +33,8 @@ def create_movie():
     try:
         c.execute(
             """
-            SELECT imdb_key FROM movies
+            SELECT imdb_key 
+            FROM movies
             WHERE imdb_key = ?
             """,
             [imdb_key]

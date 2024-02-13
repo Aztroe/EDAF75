@@ -49,29 +49,24 @@ def get_movies(customer_username):
     c = db.cursor()
     c.execute(
         """
-        WITH users_tickets AS (
-            SELECT performance_id
-            FROM customers
-                INNER JOIN tickets USING (username)
-            WHERE username = ?
-        )
-        SELECT   start_date, start_time, theater_name, movie_title, movie_year, COUNT(performance_id)
-        FROM     users_tickets
-            LEFT JOIN performances USING (performance_id)
+        SELECT   start_date, start_time, theater_name, movie_title, movie_year, count()
+        FROM     tickets
+                 JOIN performances USING (performance_id)
+        WHERE    customer_username = ?
         GROUP BY performance_id
-        """,
+        """
+        ,
         [customer_username]
-
     )
 
     found = [{"date": start_date,
-            "title": start_time,
+            "startTime": start_time,
             "theater": theater_name,
             "title": movie_title,
             "year":movie_year,
             "nbrOfTickets": count
             } 
             for start_date, start_time, theater_name, movie_title, movie_year, count in c]
-    if len(found) == 0:
-        response.status = 400
+    # if len(found) == 0:
+    #     response.status = 400
     return {"data": found}

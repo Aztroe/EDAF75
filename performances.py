@@ -26,7 +26,6 @@ def get_performances():
         """
     )
 
-    response.status = 200
     found = [{"performanceId": performance_id,
               "date": start_date,
               "startTime": start_time,
@@ -35,6 +34,7 @@ def get_performances():
               "theater": theater_name,
               "remainingSeats": remaining_seats} 
               for performance_id, start_date, start_time, movie_title, movie_year, theater_name, remaining_seats in c]
+    response.status = 200
     return {"data": found}
 
 @performances_app.post('/')

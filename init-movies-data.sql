@@ -15,7 +15,7 @@ CREATE TABLE theaters (
 );
 
 CREATE TABLE performances (
-    performance_id    TEXT DEFAULT (lower(hex(randomblob(16)))),
+    performance_id  TEXT DEFAULT (lower(hex(randomblob(16)))),
     start_date      DATE,
     start_time      TIME,
     theater_name    TEXT,
@@ -37,7 +37,7 @@ CREATE TABLE movies (
 CREATE TABLE tickets (
     ticket_id           TEXT DEFAULT (lower(hex(randomblob(16)))),
     customer_username   TEXT,
-    performance_id        TEXT,
+    performance_id      TEXT,
     PRIMARY KEY  (ticket_id),
     FOREIGN KEY  (customer_username)       REFERENCES customers(username),
     FOREIGN KEY  (performance_id)            REFERENCES performances(performance_id)
