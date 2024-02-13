@@ -17,8 +17,6 @@ main.mount(TICKETS_ENDPOINT,    tickets_app)
 
 @main.get('/ping')
 def ping():
-
-    response.status = 200
     return "pong"
 
 @main.post('/reset')
@@ -59,7 +57,6 @@ def reset():
         """
     )
     db.commit()
-    response.status = 200
 
 @main.get('/theaters') # TEST THAT /reset WORKS
 def get_theaters():
@@ -70,7 +67,6 @@ def get_theaters():
         FROM     theaters
         """
     )
-    response.status = 200
     found = [{"theaterName": theater_name,
               "capacity": capacity} 
               for theater_name, capacity in c]

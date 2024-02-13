@@ -67,6 +67,4 @@ def get_movies(customer_username):
             "nbrOfTickets": count
             } 
             for start_date, start_time, theater_name, movie_title, movie_year, count in c]
-    # if len(found) == 0:
-    #     response.status = 400
     return {"data": found}

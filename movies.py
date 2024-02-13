@@ -15,7 +15,6 @@ def get_movies():
         FROM     movies
         """
     )
-    response.status = 200
     found = [{"imdbKey": imdb_key,
               "title": title,
               "year": year} 
@@ -71,14 +70,11 @@ def get_movies(imdb_key):
         WHERE imdb_key = ?
         """,
         [imdb_key]
-
     )
 
     found = [{"imdbKey": imdb_key,
             "title": title,
             "year": year} 
             for imdb_key, title, year in c]
-    if len(found) == 0:
-        response.status = 400
     return {"data": found}
 

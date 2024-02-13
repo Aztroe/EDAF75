@@ -34,7 +34,6 @@ def get_performances():
               "theater": theater_name,
               "remainingSeats": remaining_seats} 
               for performance_id, start_date, start_time, movie_title, movie_year, theater_name, remaining_seats in c]
-    response.status = 200
     return {"data": found}
 
 @performances_app.post('/')
@@ -47,7 +46,7 @@ def add_performance():
 
     c = db.cursor()
     try:
-        c.execute( # "COUNT(*)" eller bara "*" ?
+        c.execute(
             """
             SELECT theater_name
             FROM theaters
@@ -73,7 +72,7 @@ def add_performance():
             return "No such movie or theater"
         else:
             movie_title, movie_year = movie_cols
-            c.execute( # kolla performance vad som ska in, inte rätt nu
+            c.execute(
                 """
                 INSERT
                 INTO performances(start_date, start_time, theater_name, movie_title, movie_year)
