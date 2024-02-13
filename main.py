@@ -4,60 +4,61 @@ import sqlite3
 PORT = 7007
 db = sqlite3.connect('movies.sqlite')
 
-from movies import movies_endpoint
-# from users import users_endpoint
-from performances import performances_endpoint
+from movies import movies_app, MOVIES_ENDPOINT
+from users import users_app, USERS_ENDPOINT
+from performances import performances_app, PERFORMANCES_ENDPOINT
+from tickets import tickets_app, TICKETS_ENDPOINT
 
 main = Bottle()
-main.mount('/movies', movies_endpoint)
-# main.mount('/users', users_endpoint)
-main.mount('/performances', performances_endpoint)
+main.mount(MOVIES_ENDPOINT,     movies_app)
+main.mount(USERS_ENDPOINT,      users_app)
+main.mount(PERFORMANCES_ENDPOINT, performances_app)
+main.mount(TICKETS_ENDPOINT,    tickets_app)
 
 @main.get('/ping')
 def ping():
 
     response.status = 200
-    return {"data": "pong"}
+    return "pong"
 
 @main.post('/reset')
 def reset():
     c = db.cursor()
     c.execute(
         """
-        DELETE FROM ticket;
+        DELETE FROM tickets;
         """
     )
     c.execute(
         """
-        DELETE FROM screening;
+        DELETE FROM performances;
         """
     )
     c.execute(
         """
-        DELETE FROM customer;
+        DELETE FROM customers;
         """
     )
     c.execute(
         """
-        DELETE FROM movie;
+        DELETE FROM movies;
         """
     )
     c.execute(
         """
-        DELETE FROM theater;
+        DELETE FROM theaters;
         """
     )
     c.execute(
         """
         INSERT
-        INTO   theater(theater_name, capacity)
+        INTO   theaters(theater_name, capacity)
         VALUES ('Regal', 16),
                ('Kino',       10),
                ('Skandia',     100);
         """
     )
-    db.commit() #-> sqlite3.OperationalError: disk I/O error 
-    # ksk att main.py inte får modifiera movies.sqlite filen
+    db.commit()
     response.status = 200
 
 @main.get('/theaters') # TEST THAT /reset WORKS
@@ -66,7 +67,7 @@ def get_theaters():
     c.execute(
         """
         SELECT   *
-        FROM     theater
+        FROM     theaters
         """
     )
     response.status = 200

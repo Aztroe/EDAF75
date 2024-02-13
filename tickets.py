@@ -1,55 +1,91 @@
-# from bottle import Bottle, get, post, run, request, response
-# import sqlite3
+from bottle import Bottle, get, post, run, request, response
+import sqlite3
+from users import hash as user_pwd_hash
 
-# db = sqlite3.connect('movies.sqlite')
+db = sqlite3.connect('movies.sqlite')
 
-# movies_endpoint = Bottle()
+tickets_app = Bottle()
+TICKETS_ENDPOINT = '/tickets'
 
-# @movies_endpoint.get('/')
-# def get_movies():
-#     c = db.cursor()
-#     c.execute(
-#         """
-#         SELECT   imdb_key, movie_title, movie_year
-#         FROM     movie
-#         """
-#     )
-#     response.status = 200
-#     found = [{"imdbKey": imdb_key,
-#               "title": title,
-#               "year": year} 
-#               for imdb_key, title, year in c]
-#     return {"data": found}
+@tickets_app.post('/')
+def create_ticket():
+    data = request.json
+    username = data.get('username')
+    password = data.get('pwd')
+    password = user_pwd_hash(password)
+    performance_id = data.get('performanceId')
 
-# @movies_endpoint.post('/')
-# def create_movie(): # TODO
-#     data = request.json()
-#     imdb_key = data.get('imdbKey')
-#     title = data.get('title')
-#     year = data.get('year')
+    c = db.cursor()
 
-#     c = db.cursor()
-#     try:
-            
-#         c.execute(
-#             """
-#             SELECT lägg till ....
-#             INSERT
-#             INTO movies
-#             VALUES (?, ?, ?)
-#             RETURNING movie
-#             """,
-#             [imdb_key, title, year]
-#         )
-#     found = c.fetchone()
-#     if not found:
-#         response.statue = 400
-#         return ""
-#     else:
-#         response.statue = 201
-#         movie = found
-#         return f"/movies/{imdb_key}"
-    
-#     except sqlite.InterruptedError:
-#         response.sattus = 409
-#         return ""
+    # OK if:
+    # there is such a performance, 
+    c.execute(
+        """
+        SELECT  performance_id
+        FROM    performances
+        WHERE   performance_id = ?
+        """,
+        [performance_id]
+    )
+    if c.fetchone() is None:
+        response.status = 400 
+        return "Error" # TODO, make less vague?
+
+    # there is a user with the given username and password, 
+    c.execute(
+        """
+        SELECT  username, pass_wrd
+        FROM    customers
+        WHERE   username = ? AND pass_wrd = ?
+        """,
+        [username, password]
+    )
+    if c.fetchone() is None:
+        response.status = 401
+        return "Wrong user credentials"
+
+    # and there are still free seats
+    c.execute(
+        """
+        SELECT  iif(ticket_id IS NULL, 0, count()) AS count, capacity
+        FROM    performances
+                JOIN      theaters  USING (theater_name)
+                LEFT JOIN tickets   USING (performance_id)
+        WHERE   performance_id = ?
+        """,
+        [performance_id]
+    )
+
+    count, capacity = c.fetchone()
+    remaining_seats = capacity - count
+    if remaining_seats == 0:
+        response.status = 400
+        return "No tickets left"
+    elif remaining_seats < 0:
+        response.status = 400
+        return "Error" # TODO, make less vague?
+
+    try:  
+        c.execute(
+            """
+            INSERT
+            INTO        tickets(customer_username, performance_id)
+            VALUES      (?, ?)
+            RETURNING   ticket_id
+            """,
+            [username, performance_id]
+        )
+        ticket_id, = c.fetchone()
+        db.commit()
+        response.status = 201
+        return f"{TICKETS_ENDPOINT}/{ticket_id}"
+    except sqlite3.DatabaseError:
+        response.status = 400
+        return "Error" # TODO, make less vague?
+
+    # except sqlite3.IntegrityError:
+    #     response.status = 400
+    #     return "Error" # TODO, make less vague?
+    # except sqlite3.OperationalError:
+    #     response.status = 400
+    #     return "Error" # TODO, make less vague?

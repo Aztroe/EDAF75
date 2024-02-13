@@ -1,34 +1,32 @@
 PRAGMA foreign_keys=OFF;
 
-DROP TABLE IF EXISTS theater;
-DROP TABLE IF EXISTS screening;
-DROP TABLE IF EXISTS movie;
-DROP TABLE IF EXISTS ticket;
-DROP TABLE IF EXISTS customer;
+DROP TABLE IF EXISTS theaters;
+DROP TABLE IF EXISTS performances;
+DROP TABLE IF EXISTS movies;
+DROP TABLE IF EXISTS tickets;
+DROP TABLE IF EXISTS customers;
 
 PRAGMA foreign_keys=ON;
 
-CREATE TABLE theater (
+CREATE TABLE theaters (
     theater_name    TEXT,
     capacity        INTEGER,
     PRIMARY KEY  (theater_name)
 );
 
-CREATE TABLE screening (
-    screening_id    TEXT,
+CREATE TABLE performances (
+    performance_id    TEXT DEFAULT (lower(hex(randomblob(16)))),
     start_date      DATE,
     start_time      TIME,
     theater_name    TEXT,
     movie_title     TEXT,
     movie_year      INTEGER,
-    remaining_seats INTEGER,
-    FOREIGN KEY  (theater_name) REFERENCES theater(theater_name),
-    FOREIGN KEY  (movie_title, movie_year)  REFERENCES movie(movie_title, movie_year),
-    PRIMARY KEY  (screening_id)
-    -- PRIMARY KEY  (theater_name, movie_title, movie_year, start_date, start_time)
+    FOREIGN KEY  (theater_name) REFERENCES theaters(theater_name),
+    FOREIGN KEY  (movie_title, movie_year)  REFERENCES movies(movie_title, movie_year),
+    PRIMARY KEY  (performance_id)
 );
 
-CREATE TABLE movie (
+CREATE TABLE movies (
     movie_title     TEXT,
     movie_year      INTEGER,
     imdb_key        TEXT,
@@ -36,22 +34,16 @@ CREATE TABLE movie (
     PRIMARY KEY  (movie_title, movie_year)
 );
 
-CREATE TABLE ticket (
+CREATE TABLE tickets (
     ticket_id           TEXT DEFAULT (lower(hex(randomblob(16)))),
     customer_username   TEXT,
-    screening_id        TEXT,
-    -- theater_name        TEXT,
-    -- movie_title         TEXT,
-    -- movie_year          INTEGER,
-    -- start_date          DATE,
-    -- start_time          TIME,
+    performance_id        TEXT,
     PRIMARY KEY  (ticket_id),
-    FOREIGN KEY  (customer_username)       REFERENCES customer(username),
-    FOREIGN KEY  (screening_id)            REFERENCES screening(screening_id)
-    -- FOREIGN KEY  (theater_name, movie_title, movie_year, start_date, start_time) REFERENCES screening(theater_name, movie_title, movie_year, start_date, start_time)
+    FOREIGN KEY  (customer_username)       REFERENCES customers(username),
+    FOREIGN KEY  (performance_id)            REFERENCES performances(performance_id)
 );
 
-CREATE TABLE customer (
+CREATE TABLE customers (
     username    TEXT,
     full_name   TEXT,
     pass_wrd    TEXT,
@@ -60,20 +52,20 @@ CREATE TABLE customer (
 
 ------------------------------------------------
 
-DELETE FROM theater;
-DELETE FROM screening;
-DELETE FROM movie;
-DELETE FROM ticket;
-DELETE FROM customer;
+DELETE FROM theaters;
+DELETE FROM performances;
+DELETE FROM movies;
+DELETE FROM tickets;
+DELETE FROM customers;
 
 INSERT
-INTO   theater(theater_name, capacity)
+INTO   theaters(theater_name, capacity)
 VALUES ('Filmstaden', 175),
        ('Kino',       50),
        ('SF Bio',     100);
 
 INSERT
-INTO   movie(movie_title, movie_year, imdb_key) --run_time)
+INTO   movies(movie_title, movie_year, imdb_key) --run_time)
 VALUES ('Titanic',        1997, 'tt0120338'),--, '03:14'),
        ('The Rise and Fall of Scooby Doo', 2002, 'tt0267913'),--, '01:29'),
        ('The Rise and Fall of Scooby Doo', 2019, 'tt2294449'),--, '01:52'),
@@ -82,7 +74,7 @@ VALUES ('Titanic',        1997, 'tt0120338'),--, '03:14'),
        ('The Grand Budapest Hotel', 2014, 'tt2278388');--, '01:39');
 
 INSERT
-INTO   customer(username, full_name, pass_wrd)
+INTO   customers(username, full_name, pass_wrd)
 VALUES ('vitooo', 'Victor Truong',  '1234'),
        ('freddy', 'Fredrik Orheim', '2345'),
        ('Bona',   'Jona Waldfogel', '3456'),
@@ -91,7 +83,7 @@ VALUES ('vitooo', 'Victor Truong',  '1234'),
        ('alex_brown', 'Alex Brown', 'anotherpass');
 
 -- INSERT
--- INTO   screening(start_date, start_time, theater_name, movie_title, movie_year)
+-- INTO   performance(start_date, start_time, theater_name, movie_title, movie_year)
 -- VALUES  ('2024-02-10', '14:00', 'Filmstaden', 'Titanic', 1997),
 --         ('2024-02-10', '18:00', 'Filmstaden', 'Titanic', 1997),
 --         ('2024-02-11', '20:00', 'Kino', 'The Rise and Fall of Scooby Doo', 2002),
